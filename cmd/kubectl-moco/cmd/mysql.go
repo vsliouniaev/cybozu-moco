@@ -34,6 +34,7 @@ var mysqlCmd = &cobra.Command{
 	Long:  "Run mysql command in a specified MySQL instance.",
 	Args:  cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		// TODO: Vas - Make this return sensible error about cluster being offline
 		return runMySQLCommand(cmd.Context(), args[0], cmd, args[1:])
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {

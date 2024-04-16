@@ -459,6 +459,7 @@ func (p *managerProcess) configurePrimary(ctx context.Context, ss *StatusSet) (r
 		}
 	}
 
+	// TODO: Vas - can we just check spec.offline here?
 	if ss.Cluster.Spec.Replicas == 1 {
 		return
 	}

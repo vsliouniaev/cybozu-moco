@@ -28,7 +28,8 @@ type MySQLClusterSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Replicas is the number of instances. Available values are positive odd numbers.
+	// Replicas is the number of instances. Available values are positive odd numbers or 0 to fully scale
+	// down the cluster.
 	// +kubebuilder:default=1
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
@@ -122,6 +123,10 @@ type MySQLClusterSpec struct {
 	// During container init moco-agent will set mysql admin interface is bound to localhost. The moco-agent will also
 	// communicate with mysqld over localhost when acting as a sidecar.
 	AgentUseLocalhost bool `json:"agentUseLocalhost,omitempty"`
+
+	// Offline sets the cluster offline, releasing compute resources. Data is not removed.
+	// +optional
+	Offline bool `json:"offline,omitempty"`
 }
 
 func (s MySQLClusterSpec) validateCreate() (admission.Warnings, field.ErrorList) {
@@ -159,11 +164,13 @@ func (s MySQLClusterSpec) validateCreate() (admission.Warnings, field.ErrorList)
 	}
 
 	pp = p.Child("replicas")
-	if s.Replicas%2 == 0 {
-		allErrs = append(allErrs, field.Invalid(pp, s.Replicas, "replicas must be a positive odd number"))
-	}
-	if s.Replicas <= 0 {
-		allErrs = append(allErrs, field.Invalid(pp, s.Replicas, "replicas must be a positive integer"))
+	if s.Replicas != 0 {
+		if s.Replicas%2 == 0 {
+			allErrs = append(allErrs, field.Invalid(pp, s.Replicas, "replicas must be a positive odd number"))
+		}
+		if s.Replicas <= 0 {
+			allErrs = append(allErrs, field.Invalid(pp, s.Replicas, "replicas must be a positive integer"))
+		}
 	}
 
 	p = p.Child("podTemplate", "spec")
@@ -245,10 +252,13 @@ func (s MySQLClusterSpec) validateUpdate(ctx context.Context, apiReader client.R
 	var allErrs field.ErrorList
 	p := field.NewPath("spec")
 
-	if s.Replicas < old.Replicas {
-		p := p.Child("replicas")
-		allErrs = append(allErrs, field.Forbidden(p, "decreasing replicas is not supported yet"))
+	if s.Replicas != 0 {
+		if s.Replicas < old.Replicas {
+			p := p.Child("replicas")
+			allErrs = append(allErrs, field.Forbidden(p, "decreasing replicas is not supported yet"))
+		}
 	}
+
 	if s.ReplicationSourceSecretName != nil {
 		p := p.Child("replicationSourceSecretName")
 		if old.ReplicationSourceSecretName == nil {

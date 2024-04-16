@@ -68,7 +68,7 @@ MySQLClusterSpec defines the desired state of MySQLCluster
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
-| replicas | Replicas is the number of instances. Available values are positive odd numbers. | int32 | false |
+| replicas | Replicas is the number of instances. Available values are positive odd numbers or 0 to fully scale down the cluster. | int32 | false |
 | podTemplate | PodTemplate is a `Pod` template for MySQL server container. | [PodTemplateSpec](#podtemplatespec) | true |
 | volumeClaimTemplates | VolumeClaimTemplates is a list of `PersistentVolumeClaim` templates for MySQL server container. A claim named \"mysql-data\" must be included in the list. | [][PersistentVolumeClaim](#persistentvolumeclaim) | true |
 | primaryServiceTemplate | PrimaryServiceTemplate is a `Service` template for primary. | *[ServiceTemplate](#servicetemplate) | false |
@@ -84,6 +84,7 @@ MySQLClusterSpec defines the desired state of MySQLCluster
 | restore | Restore is the specification to perform Point-in-Time-Recovery from existing cluster. If this field is not null, MOCO restores the data as specified and create a new cluster with the data.  This field is not editable. | *[RestoreSpec](#restorespec) | false |
 | disableSlowQueryLogContainer | DisableSlowQueryLogContainer controls whether to add a sidecar container named \"slow-log\" to output slow logs as the containers output. If set to true, the sidecar container is not added. The default is false. | bool | false |
 | agentUseLocalhost | AgentUseLocalhost configures the mysqld interface to bind and be accessed over localhost instead of pod name. During container init moco-agent will set mysql admin interface is bound to localhost. The moco-agent will also communicate with mysqld over localhost when acting as a sidecar. | bool | false |
+| offline | Offline sets the cluster offline, releasing compute resources. Data is not removed. | bool | false |
 
 [Back to Custom Resources](#custom-resources)
 

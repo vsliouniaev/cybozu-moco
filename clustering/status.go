@@ -133,6 +133,7 @@ func (ss *StatusSet) DecideState() {
 // GatherStatus collects information and Kubernetes resources and construct
 // StatusSet.  It calls `StatusSet.DecideState` before returning.
 func (p *managerProcess) GatherStatus(ctx context.Context) (*StatusSet, error) {
+	// TODO: Vas - anything to do here or does it figure itself out?
 	ss := &StatusSet{}
 
 	cluster := &mocov1beta2.MySQLCluster{}
